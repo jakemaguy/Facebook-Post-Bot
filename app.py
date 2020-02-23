@@ -33,16 +33,33 @@ def return_random_sentences():
         chrome_options.add_argument("--headless")
         driver = webdriver.Chrome(executable_path = '/usr/bin/chromedriver', options = chrome_options)
         driver.get('https://www.thewordfinder.com/random-sentence-generator/')
-        page = driver.execute_script('return document.documentElement.outerHTML')
-        driver.quit()
-        # page = requests.get(
-        #     'https://www.thewordfinder.com/random-sentence-generator/')
-        soup = BeautifulSoup(page, 'lxml')
-        ul = soup.find('div', id="main")
-        print(ul)
-        sentences = ul.find(
-            'div', {'class': 'sentence-results-container'})
+
+
+        num_sentences = randint(1,4)
+        input_field = driver.find_element_by_id('sentence_count')
+        input_field.clear()
+        input_field.send_keys(num_sentences)
+
+        button = driver.find_element_by_xpath('//*[@id="main"]/form/button')
+        button.click()
+
+        sentences = []
+        for i in range(1,num_sentences):
+            sentence = driver.find_element_by_xpath('//*[@id = "results-container"]/div/div[1]/ul/li[{}]/a'.format(i))
+            sentences.append(sentence.text)
         print(sentences)
+        driver.close()
+        return('\n'.join(sentences))
+        # page = driver.execute_script('return document.documentElement.outerHTML')
+        # driver.quit()
+        # # page = requests.get(
+        # #     'https://www.thewordfinder.com/random-sentence-generator/')
+        # soup = BeautifulSoup(page, 'lxml')
+        # ul = soup.find('div', id="main")
+        # print(ul)
+        # sentences = ul.find(
+        #     'div', {'class': 'sentence-results-container'})
+        # print(sentences)
     except WebDriverException as e:  # results-container > div > div.form-group > ul
         print(e)
         return 1
@@ -107,12 +124,12 @@ if __name__ == '__main__':
         sleep_time = randint(60,300)
         # random_sentence = return_random_sentence()
         random_sentences = return_random_sentences()
-        if random_sentence == 1:
+        if random_sentences == 1:
             print("error retreiving random sentence.  Trying Again")
             continue
-        # return_value = Facebook(args.username, args.password, random_sentence, 10)
-        # if return_value == 1:
-        #     print("error posting to facebook trying again")
-        #     continue
+        return_value = Facebook(args.username, args.password, random_sentences, 10)
+        if return_value == 1:
+            print("error posting to facebook trying again")
+            continue
         print("Sleeping for {} seconds".format(sleep_time))
         sleep(sleep_time)

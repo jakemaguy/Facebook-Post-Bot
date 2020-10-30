@@ -1,0 +1,3 @@
+#!/bin/bash
+
+python3 -u app.py -U 9788468406 -P tiktok
